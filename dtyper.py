@@ -1,45 +1,65 @@
-from argparse import Namespace
-import dataclasses
-import functools
+from dataclasses import make_dataclass, field
+from functools import wraps
 import inspect
 
 
-@functools.wraps(dataclasses.make_dataclass)
-def dataclass(typer_f, base=None, **kwargs):
-    required = True
+@wraps(make_dataclass)
+def dataclass(typer_command, base=None, **kwargs):
+    def to_field(k, v, default):
+        return (k, v) if default is ... else (k, v, field(default=default))
 
-    def field_desc(name, param):
-        nonlocal required
-
-        t = param.annotation or 'typing.Any'
-        if param.default.default is not ...:
-            required = False
-            return name, t, dataclasses.field(default=param.default.default)
-
-        if not required:
-            raise ValueError('Required value after optional')
-
-        return name, t
-
-    kwargs.setdefault('cls_name', typer_f.__name__)
     if base is not None:
         kwargs['bases'] = *kwargs.get('bases', ()), base
 
-    params = inspect.signature(typer_f).parameters
-    kwargs['fields'] = [field_desc(k, v) for k, v in params.items()]
+    kwargs.setdefault('cls_name', typer_command.__name__)
+    kwargs['fields'] = [to_field(*i) for i in _params(typer_command)]
 
-    @functools.wraps(typer_f)
-    def dcommand_decorator(function_or_class):
+    @wraps(typer_command)
+    def dataclass_maker(function_or_class):
         assert callable(function_or_class)
 
         ka = dict(kwargs)
-        ns = Namespace(**(ka.pop('namespace', None) or {}))
+        ns = ka.setdefault('namespace', {})
+
         if isinstance(function_or_class, type):
             ka['bases'] = *ka.get('bases', ()), function_or_class
         else:
-            ns.__call__ = function_or_class
+            ns['__call__'] = function_or_class
 
-        ka['namespace'] = vars(ns)
-        return dataclasses.make_dataclass(**ka)
+        if 'typer_command' not in ns:
+            ns['typer_command'] = staticmethod(typer_command)
 
-    return dcommand_decorator
+        return make_dataclass(**ka)
+
+    return dataclass_maker
+
+
+def function(typer_command):
+    params = list(_params(typer_command))
+
+    @wraps(typer_command)
+    def wrapped(*args, **kwargs):
+        for name, _, default in params[len(args):]:
+            args = *args, kwargs.pop(name, default)
+
+        if kwargs:
+            s = 's' * (len(kwargs) != 1)
+            raise ValueError(f'Unknown parameter{s} {list[kwargs]}')
+        return typer_command(*args)
+
+    return wrapped
+
+
+def _params(typer_command):
+    required = True
+    params = inspect.signature(typer_command).parameters
+    for name, param in params.items():
+        t = param.annotation or 'typing.Any'
+        default = param.default.default
+
+        if default is not ...:
+            required = False
+        elif not required:
+            raise ValueError('Required value after optional')
+
+        yield name, t, default

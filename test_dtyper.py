@@ -6,6 +6,28 @@ import pytest
 command = Typer().command
 
 
+@dtyper.function
+@command(help='test')
+def simple_command(
+    bucket: str = Argument(
+        ..., help='The bucket to use'
+    ),
+
+    keys: str = Argument(
+        'keys', help='The keys to download'
+    ),
+
+    pid: Optional[int] = Option(
+        None, help='pid'
+    ),
+):
+    return bucket, keys, pid
+
+
+def test_simple_command():
+    assert simple_command('bukket', pid=3) == ('bukket', 'keys', 3)
+
+
 @command(help='test')
 def a_command(
     bucket: str = Argument(
@@ -20,7 +42,7 @@ def a_command(
         None, help='pid'
     ),
 ):
-    ACommand(**locals())()
+    return ACommand(**locals())()
 
 
 @dtyper.dataclass(a_command)
@@ -36,9 +58,22 @@ class ACommand:
         return self.pid
 
 
+def test_acommand():
+    assert ACommand('bukket')() == ('bukket-post', 'keys', None)
+    assert ACommand('bukket', 'kois', pid=3)() == ('bukket-post', 'kois', 3)
+
+    match = 'missing 1 required positional argument: \'bucket\''
+    with pytest.raises(TypeError, match=match):
+        ACommand()
+
+
 @dtyper.dataclass(a_command)
-def a_function(self):
+def c_function(self):
     return self.bucket, self.keys, self.pid
+
+
+def test_c_function():
+    assert c_function('bukket')() == ('bukket', 'keys', None)
 
 
 class BCommand:
@@ -58,19 +93,6 @@ class BCommand:
 def b_function(self):
     assert self.post_init
     return self.get()
-
-
-def test_dcommand():
-    assert ACommand('bukket')() == ('bukket-post', 'keys', None)
-    assert ACommand('bukket', 'kois', pid=3)() == ('bukket-post', 'kois', 3)
-
-    match = 'missing 1 required positional argument: \'bucket\''
-    with pytest.raises(TypeError, match=match):
-        ACommand()
-
-
-def test_afunction():
-    assert a_function('bukket')() == ('bukket', 'keys', None)
 
 
 def test_inheritance():
