@@ -2,6 +2,8 @@ from dataclasses import make_dataclass, field
 from functools import wraps
 import inspect
 
+__version__ = '0.9.0'
+
 
 @wraps(make_dataclass)
 def dataclass(typer_command, base=None, **kwargs):
