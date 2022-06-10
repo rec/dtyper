@@ -20,14 +20,12 @@ def dataclass(typer_command, base=None, **kwargs):
 
         ka = dict(kwargs)
         ns = ka.setdefault('namespace', {})
+        ns['typer_command'] = staticmethod(typer_command)
 
         if isinstance(function_or_class, type):
             ka['bases'] = *ka.get('bases', ()), function_or_class
         else:
             ns['__call__'] = function_or_class
-
-        if 'typer_command' not in ns:
-            ns['typer_command'] = staticmethod(typer_command)
 
         return make_dataclass(**ka)
 
@@ -39,13 +37,20 @@ def function(typer_command):
 
     @wraps(typer_command)
     def wrapped(*args, **kwargs):
-        for name, _, default in params[len(args):]:
-            args = *args, kwargs.pop(name, default)
+        tc = typer_command.__name__ + '()'
 
-        if kwargs:
-            s = 's' * (len(kwargs) != 1)
-            raise ValueError(f'Unknown parameter{s} {list[kwargs]}')
-        return typer_command(*args)
+        if len(args) > len(params):
+            lp = len(params)
+            s = 's' * (lp != 1)
+            la = len(args)
+            raise TypeError(f'{tc} takes {lp} argument{s} but {la} were given')
+
+        for name, _, default in params[len(args):]:
+            value = kwargs.pop(name, default)
+            if value is ...:
+                raise TypeError(f'{tc} missing required parameter \'{name}\'')
+            args = *args, value
+        return typer_command(*args, **kwargs)
 
     return wrapped
 

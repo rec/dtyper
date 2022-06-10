@@ -28,6 +28,36 @@ def test_simple_command():
     assert simple_command('bukket', pid=3) == ('bukket', 'keys', 3)
 
 
+def test_bad_default():
+    with pytest.raises(ValueError):
+        @dtyper.function
+        @command(help='test')
+        def bad_command(
+            bucket: str = Argument(
+                'bucket', help='The bucket to use'
+            ),
+
+            pid: Optional[int] = Option(
+                ..., help='pid'
+            ),
+        ):
+            pass
+
+
+def test_args():
+    match = r"simple_command\(\) got an unexpected keyword argument 'frog'"
+    with pytest.raises(TypeError, match=match):
+        simple_command('bukket', frog=30)
+
+    match = r'simple_command\(\) takes 3 arguments but 4 were given'
+    with pytest.raises(TypeError, match=match):
+        simple_command('bukket', 'key', 12, 30)
+
+    match = r"simple_command\(\) missing required parameter 'bucket'"
+    with pytest.raises(TypeError, match=match):
+        simple_command()
+
+
 @command(help='test')
 def a_command(
     bucket: str = Argument(
