@@ -1,4 +1,4 @@
-from engora.misc import dcommand
+import dtyper
 from typer import Argument, Option, Typer
 from typing import Optional
 import pytest
@@ -23,7 +23,7 @@ def a_command(
     ACommand(**locals())()
 
 
-@dcommand(a_command)
+@dtyper.dataclass(a_command)
 class ACommand:
     def __post_init__(self):
         self.bucket += '-post'
@@ -36,7 +36,7 @@ class ACommand:
         return self.pid
 
 
-@dcommand(a_command)
+@dtyper.dataclass(a_command)
 def a_function(self):
     return self.bucket, self.keys, self.pid
 
@@ -54,7 +54,7 @@ class BCommand:
         return self.bucket, self.keys, self.pid
 
 
-@dcommand(a_command, BCommand)
+@dtyper.dataclass(a_command, BCommand)
 def b_function(self):
     assert self.post_init
     return self.get()
