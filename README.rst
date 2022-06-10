@@ -1,5 +1,4 @@
-⌨️dtyper: Make typer functions callable, or dataclasses! ⌨️
------------------------------------------------------------------
+⌨️dtyper: Call typer commands or make dataclasses from them ⌨️
 
 Install using ``pip install dtyper``.
 
@@ -7,6 +6,6 @@ Install using ``pip install dtyper``.
 with the correct defaults.
 
 ``dtyper.dataclass`` is a decorator that takes a ``typer`` command and makes a
-datatype from it, wrapping either a function or a callable class.
+dataclass from it, wrapping either a function or a callable class.
 
-See test_dtyper.py for examples of use.
+See ``test_dtyper.py`` for examples of use.
