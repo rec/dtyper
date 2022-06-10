@@ -12,16 +12,18 @@ _classifiers = [
 
 if __name__ == '__main__':
     from setuptools import setup
-    import datacls
+    import dtyper
+
+    desc = '⌨️dtyper: Call typer commands or make dataclasses from them ⌨️'
 
     setup(
-        name='datacls',
-        version=datacls.__version__,
+        name='dtyper',
+        version=dtyper.__version__,
         author='Tom Ritchford',
         author_email='tom@swirly.com',
-        url='https://github.com/rec/datacls',
-        py_modules=['datacls'],
-        description='Slightly improved dataclasses',
+        url='https://github.com/rec/dtyper',
+        py_modules=['dtyper'],
+        description=desc,
         long_description=open('README.rst').read(),
         license='MIT',
         classifiers=_classifiers,
