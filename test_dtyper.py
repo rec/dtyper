@@ -51,8 +51,7 @@ def test_args():
     with pytest.raises(TypeError, match='too many positional arguments'):
         simple_command('bukket', 'key', 12, 30)
 
-    match = "missing a required argument: 'bucket'"
-    with pytest.raises(TypeError, match=match):
+    with pytest.raises(TypeError, match="required argument: 'bucket'"):
         simple_command()
 
 
