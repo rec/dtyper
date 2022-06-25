@@ -1,23 +1,41 @@
-from dataclasses import make_dataclass, field
+from __future__ import annotations
+from dataclasses import field, make_dataclass
 from functools import wraps
+from typing import TYPE_CHECKING
 import inspect
+
+if TYPE_CHECKING:
+    from typing import Callable, Optional, Type, TypeVar, Union
+
+    from typing_extensions import ParamSpec
+
+    P = ParamSpec('P')
+    R = TypeVar('R')
 
 __version__ = '0.9.0'
 
 
 @wraps(make_dataclass)
-def dataclass(typer_command, base=None, **kwargs):
-    def to_field(k, v, default):
-        return (k, v) if default is ... else (k, v, field(default=default))
-
+def dataclass(
+    typer_command: Callable[P, R],
+    base: Optional[Type] = None,
+    **kwargs
+) -> Callable[[Union[Type, Callable]], Type]:
     if base is not None:
         kwargs['bases'] = *kwargs.get('bases', ()), base
 
+    def param_to_field_desc(p):
+        if p.default is inspect.Parameter.empty:
+            return p.name, p.annotation
+        else:
+            return p.name, p.annotation, field(default=p.default)
+
+    params = _fixed_signature(typer_command).parameters.values()
+    kwargs['fields'] = [param_to_field_desc(p) for p in params]
     kwargs.setdefault('cls_name', typer_command.__name__)
-    kwargs['fields'] = [to_field(*i) for i in _params(typer_command)]
 
     @wraps(typer_command)
-    def dataclass_maker(function_or_class):
+    def dataclass_maker(function_or_class: Union[Type, Callable]) -> Type:
         assert callable(function_or_class)
 
         ka = dict(kwargs)
@@ -34,39 +52,39 @@ def dataclass(typer_command, base=None, **kwargs):
     return dataclass_maker
 
 
-def function(typer_command):
-    params = list(_params(typer_command))
+def function(
+    typer_command: Callable[P, R]
+) -> Callable[P, R]:
+    """Return function that can be called outside of a typer.Typer app context
+
+    This allows a function with default argument values of instance
+    `typer.Option` and `typer.Argument` to be called without having to provide
+    all the defaults manually.
+    """
+    sig = _fixed_signature(typer_command)
 
     @wraps(typer_command)
-    def wrapped(*args, **kwargs):
-        tc = typer_command.__name__ + '()'
+    def wrapped(*args: P.args, **kwargs: P.kwargs) -> R:
+        bound = sig.bind(*args, **kwargs)
+        bound.apply_defaults()
+        return typer_command(*bound.args, **bound.kwargs)
 
-        if len(args) > len(params):
-            lp = len(params)
-            s = 's' * (lp != 1)
-            la = len(args)
-            raise TypeError(f'{tc} takes {lp} argument{s} but {la} were given')
-
-        for name, _, default in params[len(args):]:
-            value = kwargs.pop(name, default)
-            if value is ...:
-                raise TypeError(f'{tc} missing required parameter \'{name}\'')
-            args = *args, value
-        return typer_command(*args, **kwargs)
-
+    wrapped.__signature__ = sig  # type: ignore
     return wrapped
 
 
-def _params(typer_command):
-    required = True
-    params = inspect.signature(typer_command).parameters
-    for name, param in params.items():
-        t = param.annotation or 'typing.Any'
-        default = param.default.default
+def _fixed_signature(
+    typer_command: Callable[P, R]
+) -> inspect.Signature:
+    """
+    Return `inspect.Signature` with fixed default values for typer objects.
+    """
+    def fix_param(p):
+        default = getattr(p.default, 'default', p.default)
+        if default is ...:
+            default = inspect.Parameter.empty
+        return p.replace(default=default)
 
-        if default is not ...:
-            required = False
-        elif not required:
-            raise ValueError('Required value after optional')
-
-        yield name, t, default
+    sig = inspect.signature(typer_command)
+    parameters = [fix_param(p) for p in sig.parameters.values()]
+    return sig.replace(parameters=parameters)
