@@ -45,16 +45,13 @@ def test_bad_default():
 
 
 def test_args():
-    match = r"simple_command\(\) got an unexpected keyword argument 'frog'"
-    with pytest.raises(TypeError, match=match):
+    with pytest.raises(TypeError, match="unexpected keyword argument 'frog'"):
         simple_command('bukket', frog=30)
 
-    match = r'simple_command\(\) takes 3 arguments but 4 were given'
-    with pytest.raises(TypeError, match=match):
+    with pytest.raises(TypeError, match='too many positional arguments'):
         simple_command('bukket', 'key', 12, 30)
 
-    match = r"simple_command\(\) missing required parameter 'bucket'"
-    with pytest.raises(TypeError, match=match):
+    with pytest.raises(TypeError, match="missing a required argument: 'bucket'"):
         simple_command()
 
 

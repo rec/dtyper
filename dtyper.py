@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+import inspect
 from dataclasses import field, make_dataclass
 from functools import wraps
-from inspect import Signature, signature, Parameter
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Callable, TypeVar
+    from typing import Callable, Optional, Type, TypeVar, Union
 
     from typing_extensions import ParamSpec
 
@@ -17,7 +17,9 @@ __version__ = '0.9.0'
 
 
 @wraps(make_dataclass)
-def dataclass(typer_command, base=None, **kwargs):
+def dataclass(
+    typer_command: Callable[P, R], base: Optional[Type] = None, **kwargs
+) -> Callable[[Union[Type, Callable]], Type]:
 
     if base is not None:
         kwargs['bases'] = *kwargs.get('bases', ()), base
@@ -25,13 +27,13 @@ def dataclass(typer_command, base=None, **kwargs):
     kwargs.setdefault('cls_name', typer_command.__name__)
     kwargs['fields'] = [
         (p.name, p.annotation)
-        if p.default is Parameter.empty
+        if p.default is inspect.Parameter.empty
         else (p.name, p.annotation, field(default=p.default))
         for p in _fixed_signature(typer_command).parameters.values()
     ]
 
     @wraps(typer_command)
-    def dataclass_maker(function_or_class):
+    def dataclass_maker(function_or_class: Union[Type, Callable]) -> Type:
         assert callable(function_or_class)
 
         ka = dict(kwargs)
@@ -68,15 +70,15 @@ def function(typer_command: Callable[P, R]) -> Callable[P, R]:
     return wrapped
 
 
-def _fixed_signature(typer_command: Callable[P, R]) -> Signature:
+def _fixed_signature(typer_command: Callable[P, R]) -> inspect.Signature:
     """Return `inspect.Signature` with fixed default values for typer objects."""
-    sig = signature(typer_command)
+    sig = inspect.signature(typer_command)
 
     fixed_parameters = []
     for param in sig.parameters.values():
         new_default = getattr(param.default, "default", param.default)
         if new_default is Ellipsis:
-            new_default = Parameter.empty
+            new_default = inspect.Parameter.empty
         fixed_parameters.append(param.replace(default=new_default))
 
     return sig.replace(parameters=fixed_parameters)
