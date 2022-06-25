@@ -62,6 +62,7 @@ def function(typer_command: Callable[P, R]) -> Callable[P, R]:
 
     @wraps(typer_command)
     def wrapped(*args: P.args, **kwargs: P.kwargs) -> R:
+        # https://docs.python.org/3/library/inspect.html#inspect.Signature.bind
         bound = new_sig.bind(*args, **kwargs)
         bound.apply_defaults()
         return typer_command(*bound.args, **bound.kwargs)
