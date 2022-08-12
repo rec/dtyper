@@ -1,8 +1,12 @@
 from __future__ import annotations
-from dataclasses import field, make_dataclass
 from functools import wraps
 from typing import TYPE_CHECKING
 import inspect
+
+try:
+    from datacls import field, make_dataclass
+except ImportError:
+    from dataclasses import field, make_dataclass
 
 if TYPE_CHECKING:
     from typing import Callable, Optional, Type, TypeVar, Union
