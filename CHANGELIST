@@ -1,3 +1,9 @@
+## v1.0.0 - 22/08/12
+
+* First major release
+* Use datacls instead of dataclasses if available
+* Enable direnv for this project
+
 ## v0.10.0 - 25/06/10
 
 * Improve `dtyper.function()`
