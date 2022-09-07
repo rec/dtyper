@@ -124,3 +124,9 @@ def b_function(self):
 
 def test_inheritance():
     assert b_function('bukket')() == ('bukket', 'keys', None)
+
+
+def test_aliases():
+    from dtyper import Argument, Option
+    assert Argument is globals()['Argument']
+    assert Option is globals()['Option']
