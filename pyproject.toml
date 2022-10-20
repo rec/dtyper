@@ -7,11 +7,13 @@ target-version = ['py37']
 auto = true
 
 [tool.poetry]
-name = "dtyper"
-version = "1.1.1"
-description = "⌨️dtyper: Call typer commands or make dataclasses from them ⌨"
 authors = ["Tom Ritchford <tom@swirly.com>"]
+description = "⌨️dtyper: Call typer commands or make dataclasses from them ⌨"
+homepage = "https://github.com/rec/dtyper"
+name = "dtyper"
 readme = "README.rst"
+repository = "https://github.com/rec/dtyper"
+version = "1.1.1"
 
 [tool.poetry.dependencies]
 python = ">=3.7"
@@ -24,5 +26,5 @@ pytest = "*"
 versy = "*"
 
 [build-system]
-requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]
