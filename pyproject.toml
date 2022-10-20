@@ -13,7 +13,7 @@ homepage = "https://github.com/rec/dtyper"
 name = "dtyper"
 readme = "README.rst"
 repository = "https://github.com/rec/dtyper"
-version = "1.1.1"
+version = "1.1.2"
 
 [tool.poetry.dependencies]
 python = ">=3.7"
