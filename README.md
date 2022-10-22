@@ -22,7 +22,7 @@ It adds just two members, and overrides a third:
 * `dtyper.function` is a decorator that takes a new `typer` command and returns
   a callable function with the correct defaults.
 
-* `dtyper.Typer`is identical to typer.Typer, except that the `command()`
+* `dtyper.Typer`is identical to `typer.Typer`, except that the `command()`
    decorator method wraps its functions with `dtyper.function`
    above so they can be called from regular Python code.  You can think of it as
    as a fix to a bug in `typer.Typer.command`, if you like. :-)
