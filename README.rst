@@ -1,11 +1,102 @@
-⌨️dtyper: Call typer commands or make dataclasses from them ⌨️
+⌨️dtyper: Call ``typer`` commands, or make a ``dataclass`` from them  ⌨️
+================================================================================
 
-Install using ``pip install dtyper``.
+``typer`` is an simple and clear system to write Python CLIs, but you cannot
+quite call the functions it creates directly.
 
-``dtyper.function`` takes a ``typer`` command and returns a callable function
-with the correct defaults.
+And as you add more and more functionality into your CLI, there is no obvious
+way to break up the code sitting in one file.
 
-``dtyper.dataclass`` is a decorator that takes a ``typer`` command and makes a
-dataclass from it, wrapping either a function or a callable class.
+``dtyper`` exports all the members that ``typer`` does so you can use it as a
+drop-in replacement for ``typer``. It adds just two members:
 
-See ``test_dtyper.py`` for examples of use.
+* ``dtyper.dataclass`` is a decorator that takes an existing ``typer`` command
+  and makes a dataclass from it.
+
+* ``dtyper.function`` is a decorator that takes a new ``typer`` command and returns
+  a callable function with the correct defaults.
+
+* ``dtyper.Typer``is identical to typer.Typer, except that the ``command()``
+   decorator method wraps its functions with ``function``
+   above so they can be called from regular Python code.  You can think of it as
+   as a fix to this bug in typer.Typer.command, if you like. :-)
+
+``dtyper.function`` filled a need several people had mentioned online, but I
+think developing with ``dtyper.dataclass`` is the way to go, particularly if you
+expect the code to grow medium-sized or beyond.
+
+
+Installation
+-------------------
+
+.. code-block:: bash
+
+    pip install dtyper
+
+Examples
+-----------
+
+``dtyper.dataclass``: simple
+=================================
+
+.. code-block:: python
+
+    @command(help='test')
+    def get_keys(
+        bucket: str = Argument(
+            ..., help='The bucket to use'
+        ),
+
+        keys: str = Argument(
+            'keys', help='The keys to download'
+        ),
+
+        pid: Optional[int] = Option(
+            None, help='pid'
+        ),
+    ):
+        return GetKeys(**locals())()
+
+    @dtyper.dataclass(get_keys)
+    class GetKeys:
+        site = 'https://www.some-websijt.nl'
+
+        def __post_init(self):
+            self.pid = self.pid or os.getpid()
+
+        def __call__(self):
+            return self.url, self.keys, self.pid
+
+        def url(self):
+           return f'{self.site}/{self.url}/{self.pid}'
+
+
+``dtyper.dataclass``: A pattern for larger CLIs
+===================================================
+
+    # In interface.py
+
+    @command(help='test')
+    def compute_everything(
+        bucket: str = Argument(
+            ..., help='The bucket to use'
+        ),
+        # dozens of parameters here
+    ):
+        d = dict(locals())
+
+        from .compute import ComputeEverything
+
+        return ComputeEverything(**d)()
+
+    # In compute.py
+
+    from .interface import compute_everything
+
+    @dtyper.dataclass(compute_everything)
+    class ComputeEverything:
+        def __call__(self):
+           if self.huge_thing() and self.etc():
+              self.more_stuff()
+
+           # Dozens of methods here
