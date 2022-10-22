@@ -1,45 +1,37 @@
-⌨️dtyper: Call ``typer`` commands, or make a ``dataclass`` from them  ⌨️
-================================================================================
+# ⌨️dtyper: Call `typer` commands, or make a `dataclass` from them  ⌨️
 
-``typer`` is an simple and clear system to write Python CLIs, but you cannot
+`typer` is an simple and clear system to write Python CLIs, but you cannot
 quite call the functions it creates directly.
 
 And as you add more and more functionality into your CLI, there is no obvious
 way to break up the code sitting in one file.
 
-``dtyper`` exports all the members that ``typer`` does so you can use it as a
-drop-in replacement for ``typer``. It adds just two members:
+`dtyper` exports all the members that `typer` does so you can use it as a
+drop-in replacement for `typer`. It adds just two members:
 
-* ``dtyper.dataclass`` is a decorator that takes an existing ``typer`` command
+* `dtyper.dataclass` is a decorator that takes an existing `typer` command
   and makes a dataclass from it.
 
-* ``dtyper.function`` is a decorator that takes a new ``typer`` command and returns
+* `dtyper.function` is a decorator that takes a new `typer` command and returns
   a callable function with the correct defaults.
 
-* ``dtyper.Typer``is identical to typer.Typer, except that the ``command()``
-   decorator method wraps its functions with ``function``
+* `dtyper.Typer`is identical to typer.Typer, except that the `command()`
+   decorator method wraps its functions with `function`
    above so they can be called from regular Python code.  You can think of it as
    as a fix to this bug in typer.Typer.command, if you like. :-)
 
-``dtyper.function`` filled a need several people had mentioned online, but I
-think developing with ``dtyper.dataclass`` is the way to go, particularly if you
+`dtyper.function` filled a need several people had mentioned online, but I
+think developing with `dtyper.dataclass` is the way to go, particularly if you
 expect the code to grow medium-sized or beyond.
 
 
-Installation
--------------------
-
-.. code-block:: bash
+## Installation
 
     pip install dtyper
 
-Examples
------------
+## Examples
 
-``dtyper.dataclass``: simple
-=================================
-
-.. code-block:: python
+### `dtyper.dataclass`: simple
 
     @command(help='test')
     def get_keys(
@@ -71,8 +63,7 @@ Examples
            return f'{self.site}/{self.url}/{self.pid}'
 
 
-``dtyper.dataclass``: A pattern for larger CLIs
-===================================================
+### `dtyper.dataclass`: A pattern for larger CLIs
 
     # In interface.py
 

@@ -11,7 +11,7 @@ authors = ["Tom Ritchford <tom@swirly.com>"]
 description = "⌨️dtyper: Call typer commands or make dataclasses from them ⌨"
 homepage = "https://github.com/rec/dtyper"
 name = "dtyper"
-readme = "README.rst"
+readme = "README.md"
 repository = "https://github.com/rec/dtyper"
 version = "1.2.0"
 
