@@ -17,8 +17,6 @@ if TYPE_CHECKING:
     P = ParamSpec('P')
     R = TypeVar('R')
 
-__version__ = '1.0.0'
-
 __all__ = tuple(sorted(k for k in dir(typer) if not k.startswith('_')))
 for _i in __all__:
     globals()[_i] = getattr(typer, _i)  # ! :-)
