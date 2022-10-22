@@ -30,6 +30,11 @@ def dataclass(
     base: Optional[Type] = None,
     **kwargs
 ) -> Callable[[Union[Type, Callable]], Type]:
+    """Automatically construct a dataclass from a typer command.
+
+    One dataclass field is created for each parameter to the typer
+    command, using the typer defaults.
+    """
     if base is not None:
         kwargs['bases'] = *kwargs.get('bases', ()), base
 
@@ -64,7 +69,8 @@ def dataclass(
 def function(
     typer_command: Callable[P, R]
 ) -> Callable[P, R]:
-    """Return function that can be called outside of a typer.Typer app context
+    """
+    Decorate a typer.command to be called outside of a typer.Typer app context.
 
     This allows a function with default argument values of instance
     `typer.Option` and `typer.Argument` to be called without having to provide
@@ -80,6 +86,23 @@ def function(
 
     wrapped.__signature__ = sig  # type: ignore
     return wrapped
+
+
+class Typer(typer.Typer):
+    """Identical to typer.Typer, except with callable ``command()``.
+
+    The ``command()`` decorator method wraps its functions with ``function``
+    above so they can be called from regular Python code.
+    """
+    @wraps(typer.Typer.command)
+    def command(self, *a, **ka):
+        decorator = super().command(*a, **ka)
+
+        @wraps(decorator)
+        def wrapped(f):
+            return function(decorator(f))
+
+        return wrapped
 
 
 def _fixed_signature(

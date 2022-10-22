@@ -4,6 +4,7 @@ from typing import Optional
 import pytest
 
 command = Typer().command
+dcommand = dtyper.Typer().command
 
 
 @dtyper.function
@@ -26,6 +27,27 @@ def simple_command(
 
 def test_simple_command():
     assert simple_command('bukket', pid=3) == ('bukket', 'keys', 3)
+
+
+@dcommand(help='test')
+def simple_command2(
+    bucket: str = Argument(
+        ..., help='The bucket to use'
+    ),
+
+    keys: str = Argument(
+        'keys', help='The keys to download'
+    ),
+
+    pid: Optional[int] = Option(
+        None, help='pid'
+    ),
+):
+    return bucket, keys, pid
+
+
+def test_simple_command2():
+    assert simple_command2('bukket', pid=3) == ('bukket', 'keys', 3)
 
 
 def test_bad_default():
