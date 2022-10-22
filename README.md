@@ -1,13 +1,20 @@
 # ⌨️dtyper: Call `typer` commands, or make a `dataclass` from them  ⌨️
 
-`typer` is an simple and clear system to write Python CLIs, but you cannot
-quite call the functions it creates directly.
+`typer` is a famously easy and useful system for writing Python CLIs but it has
+two issues.
+
+You cannot quite call the functions it creates directly.
 
 And as you add more and more functionality into your CLI, there is no obvious
 way to break up the code sitting in one file.
 
-`dtyper` exports all the members that `typer` does so you can use it as a
-drop-in replacement for `typer`. It adds just two members:
+ -----------------------------------------------
+
+`dtyper` is a drop-in replacement for `typer`, so you can write:
+
+    import dtyper as typer
+
+It adds just two members, and overrides a third:
 
 * `dtyper.dataclass` is a decorator that takes an existing `typer` command
   and makes a dataclass from it.
@@ -16,14 +23,13 @@ drop-in replacement for `typer`. It adds just two members:
   a callable function with the correct defaults.
 
 * `dtyper.Typer`is identical to typer.Typer, except that the `command()`
-   decorator method wraps its functions with `function`
+   decorator method wraps its functions with `dtyper.function`
    above so they can be called from regular Python code.  You can think of it as
-   as a fix to this bug in typer.Typer.command, if you like. :-)
+   as a fix to a bug in `typer.Typer.command`, if you like. :-)
 
 `dtyper.function` filled a need several people had mentioned online, but I
 think developing with `dtyper.dataclass` is the way to go, particularly if you
 expect the code to grow medium-sized or beyond.
-
 
 ## Installation
 
