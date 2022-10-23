@@ -35,6 +35,8 @@ def dataclass(
     One dataclass field is created for each parameter to the typer
     command, using the typer defaults.
     """
+    typer_command = getattr(typer_command, '_dtyper_dec', typer_command)
+
     if base is not None:
         kwargs['bases'] = *kwargs.get('bases', ()), base
 
@@ -100,7 +102,10 @@ class Typer(typer.Typer):
 
         @wraps(decorator)
         def wrapped(f):
-            return function(decorator(f))
+            decorated = decorator(f)
+            func = function(decorated)
+            func._dtyper_dec = decorated
+            return func
 
         return wrapped
 

@@ -125,6 +125,16 @@ def test_c_function():
     assert c_function('bukket')() == ('bukket', 'keys', None)
 
 
+@dtyper.dataclass(simple_command2)
+def simple_class(sc):
+    return sc, True
+
+
+def test_simple_class():
+    cls = simple_class(bucket='b', keys=['key'])
+    assert cls() == (cls, True)
+
+
 class BCommand:
     post_init = False
 
