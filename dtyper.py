@@ -1,5 +1,6 @@
 from __future__ import annotations
 from functools import wraps
+from typer import models
 from typing import TYPE_CHECKING
 import inspect
 import typer
@@ -116,12 +117,18 @@ def _fixed_signature(
     """
     Return `inspect.Signature` with fixed default values for typer objects.
     """
+    sig = inspect.signature(typer_command)
+
     def fix_param(p):
+        if isinstance(p.default, models.OptionInfo):
+            kind = p.KEYWORD_ONLY
+        else:
+            kind = p.kind
+
         default = getattr(p.default, 'default', p.default)
         if default is ...:
             default = inspect.Parameter.empty
-        return p.replace(default=default)
+        return p.replace(default=default, kind=kind)
 
-    sig = inspect.signature(typer_command)
     parameters = [fix_param(p) for p in sig.parameters.values()]
     return sig.replace(parameters=parameters)

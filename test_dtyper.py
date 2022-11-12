@@ -50,22 +50,6 @@ def test_simple_command2():
     assert simple_command2('bukket', pid=3) == ('bukket', 'keys', 3)
 
 
-def test_bad_default():
-    with pytest.raises(ValueError):
-        @dtyper.function
-        @command(help='test')
-        def bad_command(
-            bucket: str = Argument(
-                'bucket', help='The bucket to use'
-            ),
-
-            pid: Optional[int] = Option(
-                ..., help='pid'
-            ),
-        ):
-            pass
-
-
 def test_args():
     with pytest.raises(TypeError, match="unexpected keyword argument 'frog'"):
         simple_command('bukket', frog=30)
@@ -162,3 +146,36 @@ def test_aliases():
     from dtyper import Argument, Option
     assert Argument is globals()['Argument']
     assert Option is globals()['Option']
+
+
+@dtyper.function
+@command(help='test')
+def less_simple_command(
+    bucket: str = Argument(
+        ..., help='The bucket to use'
+    ),
+
+    keys: str = Argument(
+        'keys', help='The keys to download'
+    ),
+
+    pid: Optional[int] = Option(
+        None, help='pid'
+    ),
+
+    pod: Optional[int] = Option(
+        ..., help='pid'
+    ),
+):
+    return bucket, keys, pid, pod
+
+
+def test_less_simple_command():
+    actual = less_simple_command('bukket', pid=3, pod=2)
+    expected = 'bukket', 'keys', 3, 2
+    assert actual == expected
+
+
+def test_less_simple_command_error():
+    with pytest.raises(TypeError):
+        less_simple_command('bukket', pid=3)
