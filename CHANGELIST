@@ -1,3 +1,7 @@
+## v1.2.3 - 22/11/13
+
+* Handle required options correctly (fix #4)
+
 ## v1.0.0 - 22/08/12
 
 * First major release
