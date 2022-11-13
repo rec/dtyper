@@ -1,3 +1,7 @@
+## v2.0.0 - 22/11/13
+
+* Options were previously POSITIONAL_OR_KEYWORD but are now KEYWORD_ONLY
+
 ## v1.2.3 - 22/11/13
 
 * Handle required options correctly (fix #4)
