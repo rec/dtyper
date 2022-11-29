@@ -179,3 +179,20 @@ def test_less_simple_command():
 def test_less_simple_command_error():
     with pytest.raises(TypeError):
         less_simple_command('bukket', pid=3)
+
+
+@dtyper.function
+@command(help='test')
+def required_option_without_default_command(
+    bucket: str = Argument(..., help='The bucket to use'),
+    keys: str = Argument('keys', help='The keys to download'),
+    pid: Optional[int] = Option(..., help='pid'),
+    verbose: Optional[int] = Option(
+        True,
+    ),
+):
+    return bucket, keys, pid, verbose
+
+
+def test_required_option_without_default():
+    # TODO Test for Arguements and Options in the right sections of help
