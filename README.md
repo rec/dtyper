@@ -49,6 +49,38 @@ None of the `typer` functionality is changed to the slightest degree - adding
 
 ## Examples
 
+All the examples will assume this block of code exists somewhere:
+
+    from typer import Typer
+
+    app = Typer()
+    command = app.command
+
+### Example: using `dtyper.function`
+
+Very little to type, it fixes the problem:
+
+    import dtyper
+
+
+    @dtyper.function  #  <--- add this one line
+    @command(help='test')
+    def get_keys(
+        bucket: str = Argument(
+            'buck, help='The bucket to use'
+        ),
+
+        keys: bool = Option(
+            False, help='The keys to download'
+        ),
+    ):
+        print(bucket, keys)
+
+
+    # Elsewhere in the code
+
+    get_keys()  # correctly prints 'buck False'
+
 ### Example: a simple `dtyper.dataclass`
 
 Here's a simple CLI in one Python file with two arguments `bucket`, `keys` and
@@ -69,16 +101,17 @@ one option `pid`:
         ),
     ):
         get_keys = GetKeys(**locals())
-        print(get_keys())
+        print(get_keys.run())
+
 
     @dtyper.dataclass(get_keys)
     class GetKeys:
         site = 'https://www.some-websijt.nl'
 
-        def __call__(self):
+        def run(self):
             return self.url, self.keys, self.pid
 
-        def __post_init(self):
+        def __post_init__(self):
             self.pid = self.pid or os.getpid()
 
         def url(self):
@@ -100,12 +133,6 @@ natural and convenient way.
 The example has three Python files.
 
 `interface.py` contains the Typer CLI definitions for this command.
-
-    from typer import Typer
-
-    app = Typer()
-    command = app.command
-
 
     @command(help='test')
     def big_calc(
