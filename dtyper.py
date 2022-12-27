@@ -34,8 +34,12 @@ def dataclass(
     """Automatically construct a dataclass from a typer command.
 
     One dataclass field is created for each parameter to the typer
-    command, using the typer defaults.
+    command, using typer default values obtained from
+    typer.Argument and typer.Option, if they exist.
     """
+
+    # The ._dtyper_dec logic handles the case where the decorator
+    # is called twice on the same function.
     typer_command = getattr(typer_command, '_dtyper_dec', typer_command)
 
     if base is not None:

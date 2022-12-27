@@ -1,40 +1,51 @@
-# ⌨️dtyper: Call `typer` commands, or make a `dataclass` from them  ⌨️
+# ⌨️dtyper:  a tiny library to improve `typer` ⌨️
 
-`typer` is a famously easy and useful system for writing Python CLIs but it has
-two issues.
+## What is `dtyper`?
 
-You cannot quite call the `typer.command` functions it creates directly.
+`typer` is a famously clear and useful system for writing Python CLIs but it has
+two issues that people seem to run into a lot:
 
-And as you add more and more functionality into your CLI, there is no obvious
-way to break up the code sitting in one file.
+1. You can't call the `typer.command` functions it creates directly because they
+have the wrong defaults.
 
-`dtyper` solves these two defects, calling `typer.command` functions
-with the right defaults, and constructing a `dataclass` from a `typer.command`.
+2. As you add more arguments to your CLI, there is no easy way to break up the
+code sitting in one file without passing around long, verbose parameter lists.
 
------------------------------------------------
+`dtyper` is a single-file library that adds to an existing installation of
+`typer` that solves these two problems without changing existing code at all.
 
-`dtyper` is a drop-in replacement for `typer`, so you can even write
+* `dtyper.function` decorates a `typer.command` to make it callable.
+
+* `dtyper.dataclass` automatically makes a `dataclass` from
+a `typer.command`.
+
+## How to use `dtyper`?
+
+Install as usual with `poetry add dtyper`, `pip install dtyper`, or your
+favorite package manager.
+
+`dtyper` is a drop-in replacement for `typer` - it copies all `typer`s
+properties - so you can even write
 
     import dtyper as typer
 
-if you like!
+to experiment with it before deciding.
 
- It overrides one member from `typer`, and adds two new ones:
+`dtyper` has two new functions that `typer` doesn't, and overrides a `typer`
+class:
+
+* `@dtyper.function` is a decorator that takes a `typer` command and returns
+  a callable function with the correct defaults.  It is unncessary if you use
+  `dtyper.Typer` (below)
+
+* `@dtyper.dataclass` is a decorator that takes an existing `typer` or `dtyper`
+command and makes a `dataclass` from it.
 
 * `dtyper.Typer`is a class identical to `typer.Typer`, except it fixes
-  `Typer.command` functions so you can call them directly (with the right
-  defaults).
+  `Typer.command` functions so you can call them directly.
 
-* `@dtyper.dataclass` is a decorator that takes an existing `typer` command
-  and makes a `dataclass` from it.
-
-* `@dtyper.function` is a decorator that takes a new `typer` command and returns
-  a callable function with the correct defaults.  It is unncessary if you use
-  `dtyper.Typer`.
-
-## Installation
-
-    pip install dtyper
+None of the `typer` functionality is changed to the slightest degree - adding
+`dtyper` will not affect how your command line program runs at all.
 
 ## Examples
 
@@ -74,67 +85,77 @@ one option `pid`:
            return f'{self.site}/{self.url}/{self.pid}'
 
 
-### Example: putting the `dtyper.dataclass` into a separate file
+### Example: splitting a large `typer.command` into multiple files
 
-In real world CLIs, there are frequently dozen of commands, each with dozens
-of options or arguments.
+Real world CLIs frequently have dozens if not hundreds of commands, with
+hundreds if not thousands of options, arguments, settings or command line flags.
 
-To avoid the "big bowl of mud" anti-pattern, you often want to split off the
-user-dash facing definition of the API from its implementation, and in large
-programs, you might well want to split the implementation itself into multiple
-files.
+The natural structure for this is the "big ball of mud", a popular
+anti-pattern known to cause misery and suffering to maintainers.
 
-This example has three Python files.
+`dtyper.dataclass` can split the user-facing definition of the API from its
+implementation and then split that implementation over multiple files in a
+natural and convenient way.
 
-`interface.py` contains the CLI API for this command.
+The example has three Python files.
 
-The `big_calc` module is lazy loaded in interface.py - only loaded when this
-command is actually called.
+`interface.py` contains the Typer CLI definitions for this command.
 
-Lazy loading is extremely useful in large projects, because it means you don't
-load the entire universe that any command _might_ want just to execute one tiny
-command that has no dependencies, and it is necessary in this case to avoid
-circular dependencies.
+    from typer import Typer
 
-    # In interface.py
+    app = Typer()
+    command = app.command
+
 
     @command(help='test')
     def big_calc(
         bucket: str = Argument(
             ..., help='The bucket to use'
         ),
-        # dozens of parameters here
+        more: str = Argument(
+            '', help='More information'
+        ),
+        enable_something: boolean = Option(
+            False, help='Turn on one of many important parameters'
+        ),
+        # [dozens of parameters here]
     ):
-        d = dict(locals())
+        d = dict(locals())  # Capture all the command line arguments as a dict
 
-        from .big_calc import BigCalc
+        from .big_calc import BigCalc  # Lazy import to avoid a cycle
 
-        return BigCalc(**d)()
-
-
-Here's the actual dataclass, which knows about everything.
+        bc = BigCalc(**d)
+        bc.run()
 
 
-    # In big_calc.py
+`big_calc.py` contains the `dtyper.dataclass` implementation
 
     from .interface import big_calc
     from . import helper
-    from dtyper import dataclass
+    import dtyper
 
-    @dataclass(big_calc)
+
+    @dtyper.dataclass(big_calc)
     class BigCalc:
-        def __call__(self):
-           if helper.huge_thing(self) and self.etc():
+        def run(self):
+           # Each argument in `big_calc` becomes a dataclass field
+           print(self.bucket, self.more)
+           print(self)  # dataclass gives you a nice output of all fields
+
+           if helper.huge_thing(self) and self._etc():
               self.stuff()
               helper.more_stuff(self)
+              ...
 
-           # Dozens of methods here
+        def _etc(self):
+           ...
+           # Dozens more methods here perhaps!
 
-
-
-    # In helper.py
+Some of the code is offloaded to helper files like `helper.py`:
 
     def huge_thing(big_calc):
-        # Lots of code
+        if has_hole(big_calc.bucket):
+           fix_it(big_calc.bucket, big_calc.more)
 
     def more_stuff(big_calc):
+        # even more code
