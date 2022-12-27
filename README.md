@@ -58,16 +58,16 @@ All the examples will assume this block of code exists somewhere:
 
 ### Example: using `dtyper.function`
 
-Very little to type, it fixes the problem:
+It fixes a problem using a line of code, there's not much else to tell.
 
     import dtyper
 
 
-    @dtyper.function  #  <--- add this one line
+    @dtyper.function  #  <--- add this line
     @command(help='test')
     def get_keys(
         bucket: str = Argument(
-            'buck, help='The bucket to use'
+            'buck', help='The bucket to use'
         ),
 
         keys: bool = Option(
@@ -81,10 +81,12 @@ Very little to type, it fixes the problem:
 
     get_keys()  # correctly prints 'buck False'
 
+Without that one line, you sometimes get a `typer.Argument` or
+`typer.Option` in place of an expected `str` or `bool`.
+
 ### Example: a simple `dtyper.dataclass`
 
-Here's a simple CLI in one Python file with two arguments `bucket`, `keys` and
-one option `pid`:
+Here's a simple CLI in one Python file with two `Argument`s and an `Option`:
 
     @command(help='test')
     def get_keys(
