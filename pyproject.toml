@@ -8,7 +8,7 @@ auto = true
 
 [tool.poetry]
 authors = ["Tom Ritchford <tom@swirly.com>"]
-description = "⌨ Call or make dataclasses from `typer` commands ⌨"
+description = "🗝 Make `typer` commands callable, or dataclasses! 🗝"
 homepage = "https://github.com/rec/dtyper"
 name = "dtyper"
 readme = "README.md"
