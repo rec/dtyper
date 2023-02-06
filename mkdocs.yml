@@ -1,0 +1,19 @@
+site_name: '🗝: `dtyper`: Make `typer` commands callable, or dataclasses! 🗝'
+
+theme:
+  name: material
+
+  palette:
+    primary:
+      'purple'
+
+  font:
+    text:
+      Roboto
+    code:
+      Roboto Mono
+
+extra_css: [extra.css]
+
+plugins:
+    - mkdocstrings
