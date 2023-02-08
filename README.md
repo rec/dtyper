@@ -1,6 +1,11 @@
-# ⌨️dtyper:  a tiny library to improve `typer` ⌨️
+# 🗝 `dtyper`: Make `typer` commands callable, or into dataclasses 🗝️
 
-## What is `dtyper`?
+## What is `dtyper`, in one sentence?
+
+Using `import dtyper as typer` instead of `import typer` will make your
+`typer.command`s directly callable.
+
+## Why `dtyper`?
 
 `typer` is a famously clear and useful system for writing Python CLIs but it has
 two issues that people seem to run into a lot:
