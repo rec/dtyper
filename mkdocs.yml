@@ -1,4 +1,4 @@
-site_name: '🗝: `dtyper`: Make `typer` commands callable, or dataclasses! 🗝'
+site_name: '🗝: `dtyper`: Make `typer` commands callable, or dataclasses 🗝'
 
 theme:
   name: material
