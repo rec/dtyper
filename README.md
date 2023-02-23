@@ -1,14 +1,17 @@
 # 🗝 `dtyper`: Make `typer` commands callable, or into dataclasses 🗝️
 
-## What is `dtyper`, in one sentence?
+### What is `dtyper`, in one sentence?
 
-Using `import dtyper as typer` instead of `import typer` will make your
+Using `import dtyper as typer` instead of `import typer` would make your
 `typer.command`s directly callable.
 
-## Why `dtyper`?
+(There's also a neat way to make dataclasses from typer commands, but that
+would be two sentences.)
 
-`typer` is a famously clear and useful system for writing Python CLIs but it has
-two issues that people seem to run into a lot:
+### Why `dtyper`?
+
+[`typer`](https://typer.tiangolo.com/) is a famously clear and useful system
+for writing Python CLIs but it has two issues that people seem to run into a lot:
 
 1. You can't call the `typer.command` functions it creates directly because they
 have the wrong defaults.
@@ -16,15 +19,18 @@ have the wrong defaults.
 2. As you add more arguments to your CLI, there is no easy way to break up the
 code sitting in one file without passing around long, verbose parameter lists.
 
-`dtyper` is a single-file library that adds to an existing installation of
-`typer` that solves these two problems without changing existing code at all.
+`dtyper` is a tiny, single-file library that adds to an existing installation of
+`typer` to solve these two problems without changing existing code at all.
 
-* `dtyper.function` decorates a `typer.command` to make it callable.
+* `dtyper.command` executes `typer.command` then fixes the defaults.
+
+* `dtyper.function` decorates an existing `typer.command` to have correct
+  defaults.
 
 * `dtyper.dataclass` automatically makes a `dataclass` from
-a `typer.command`.
+   a `typer.command`.
 
-## How to use `dtyper`?
+### How to use `dtyper`?
 
 Install as usual with `poetry add dtyper`, `pip install dtyper`, or your
 favorite package manager.
@@ -52,24 +58,13 @@ command and makes a `dataclass` from it.
 None of the `typer` functionality is changed to the slightest degree - adding
 `dtyper` will not affect how your command line program runs at all.
 
-## Examples
+## Example 1: using `dtyper` instead of `typer`
 
-All the examples will assume this block of code exists somewhere:
-
-    from typer import Typer
+    from dtyper import Argument, Option, Typer
 
     app = Typer()
-    command = app.command
 
-### Example: using `dtyper.function`
-
-It fixes a problem using a line of code, there's not much else to tell.
-
-    import dtyper
-
-
-    @dtyper.function  #  <--- add this line
-    @command(help='test')
+    @app.command(help='test')
     def get_keys(
         bucket: str = Argument(
             'buck', help='The bucket to use'
@@ -81,15 +76,12 @@ It fixes a problem using a line of code, there's not much else to tell.
     ):
         print(bucket, keys)
 
+You can call `get_keys()` from other code and get the right defaults.
 
-    # Elsewhere in the code
-
-    get_keys()  # correctly prints 'buck False'
-
-Without that one line, you sometimes get a `typer.Argument` or
+Without regular `typer`, you sometimes get a `typer.Argument` or
 `typer.Option` in place of an expected `str` or `bool`.
 
-### Example: a simple `dtyper.dataclass`
+### Example 2: a simple `dtyper.dataclass`
 
 Here's a simple CLI in one Python file with two `Argument`s and an `Option`:
 
@@ -193,3 +185,6 @@ Some of the code is offloaded to helper files like `helper.py`:
 
     def more_stuff(big_calc):
         # even more code
+
+
+### [API Documentation](https://rec.github.io/dtyper#dtyper--api-documentation)
