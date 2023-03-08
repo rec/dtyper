@@ -1,4 +1,4 @@
-# 🗝: `dtyper`: Make `typer` commands callable, or dataclasses 🗝
+# 🗝: `dtyper`: Fix and improve `typer` 🗝
 
 ::: dtyper
 

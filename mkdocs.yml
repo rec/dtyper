@@ -1,11 +1,11 @@
-site_name: '🗝: `dtyper`: Make `typer` commands callable, or dataclasses 🗝'
+site_name: '🗝: `dtyper`: Fix and improve `typer` 🗝'
 
 theme:
   name: material
 
   palette:
     primary:
-      'purple'
+      'deepPurple'
 
   font:
     text:
