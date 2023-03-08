@@ -1,4 +1,4 @@
-# 🗝 `dtyper`: Make `typer` commands callable, or into dataclasses 🗝️
+# 🗝 Fix and improve `typer` 🗝
 
 ### What is `dtyper`, in one sentence?
 
@@ -11,16 +11,17 @@ would be two sentences.)
 ### Why `dtyper`?
 
 [`typer`](https://typer.tiangolo.com/) is a famously clear and useful system
-for writing Python CLIs but it has two issues that people seem to run into a lot:
+for writing Python CLIs but it has two issues that people seem to run into a
+lot:
 
-1. You can't call the `typer.command` functions it creates directly because they
-have the wrong defaults.
+1. You can't call the `typer.command` functions it creates directly because
+they have the wrong defaults.
 
 2. As you add more arguments to your CLI, there is no easy way to break up the
 code sitting in one file without passing around long, verbose parameter lists.
 
-`dtyper` is a tiny, single-file library that adds to an existing installation of
-`typer` to solve these two problems without changing existing code at all.
+`dtyper` is a tiny, single-file library that adds to an existing installation
+of `typer` to solve these two problems without changing existing code at all.
 
 * `dtyper.command` executes `typer.command` then fixes the defaults.
 
@@ -120,10 +121,11 @@ Here's a simple CLI in one Python file with two `Argument`s and an `Option`:
 ### Example: splitting a large `typer.command` into multiple files
 
 Real world CLIs frequently have dozens if not hundreds of commands, with
-hundreds if not thousands of options, arguments, settings or command line flags.
+hundreds if not thousands of options, arguments, settings or command line
+flags.
 
-The natural structure for this is the "big ball of mud", a popular
-anti-pattern known to cause misery and suffering to maintainers.
+The natural structure for this is the "big ball of mud", a popular anti-pattern
+known to cause misery and suffering to maintainers.
 
 `dtyper.dataclass` can split the user-facing definition of the API from its
 implementation and then split that implementation over multiple files in a
