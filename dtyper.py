@@ -192,10 +192,50 @@ Some of the code is offloaded to helper files like `helper.py`:
 
 from __future__ import annotations
 from functools import wraps
-from typer import models
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict
 import inspect
 import typer
+from typer import (
+    Abort,
+    Argument,
+    BadParameter,
+    CallbackParam,
+    Context,
+    Exit,
+    FileBinaryRead,
+    FileBinaryWrite,
+    FileText,
+    FileTextWrite,
+    Option,
+    clear,
+    colors,
+    completion,
+    confirm,
+    core,
+    echo,
+    echo_via_pager,
+    edit,
+    format_filename,
+    get_app_dir,
+    get_binary_stream,
+    get_terminal_size,
+    get_text_stream,
+    getchar,
+    launch,
+    main,
+    models,
+    open_file,
+    params,
+    pause,
+    progressbar,
+    prompt,
+    run,
+    secho,
+    style,
+    unstyle,
+    utils,
+)
+from typer.core import TyperCommand
 
 try:
     from datacls import field, make_dataclass
@@ -210,11 +250,49 @@ if TYPE_CHECKING:
     P = ParamSpec('P')
     R = TypeVar('R')
 
-__all__ = tuple(sorted(k for k in dir(typer) if not k.startswith('_')))
-for _i in __all__:
-    globals()[_i] = getattr(typer, _i)  # ! :-)
-
-__all__ = __all__ + ('dataclass', 'function')
+__all__ = (
+    'Abort',
+    'Argument',
+    'BadParameter',
+    'CallbackParam',
+    'Context',
+    'Exit',
+    'FileBinaryRead',
+    'FileBinaryWrite',
+    'FileText',
+    'FileTextWrite',
+    'Option',
+    'Typer',
+    'clear',
+    'colors',
+    'completion',
+    'confirm',
+    'core',
+    'echo',
+    'echo_via_pager',
+    'edit',
+    'format_filename',
+    'get_app_dir',
+    'get_binary_stream',
+    'get_terminal_size',
+    'get_text_stream',
+    'getchar',
+    'launch',
+    'main',
+    'models',
+    'open_file',
+    'params',
+    'pause',
+    'progressbar',
+    'prompt',
+    'run',
+    'secho',
+    'style',
+    'unstyle',
+    'utils',
+    'dataclass',
+    'function',
+)
 
 
 @wraps(make_dataclass)
@@ -293,9 +371,39 @@ class Typer(typer.Typer):
     The ``command()`` decorator method wraps its functions with ``function``
     above so they can be called from regular Python code.
     """
+
     @wraps(typer.Typer.command)
-    def command(self, *a, **ka):
-        decorator = super().command(*a, **ka)
+    def command(
+        self,
+        name: Optional[str] = None,
+        *,
+        cls: Optional[Type[TyperCommand]] = None,
+        context_settings: Optional[Dict[Any, Any]] = None,
+        help: Optional[str] = None,
+        epilog: Optional[str] = None,
+        short_help: Optional[str] = None,
+        options_metavar: str = '[OPTIONS]',
+        add_help_option: bool = True,
+        no_args_is_help: bool = False,
+        hidden: bool = False,
+        deprecated: bool = False,
+        # Rich settings
+        rich_help_panel: Union[str, None] = models.Default(None),
+    ):
+        decorator = super().command(
+            name,
+            cls=cls,
+            context_settings=context_settings,
+            help=help,
+            epilog=epilog,
+            short_help=short_help,
+            options_metavar=options_metavar,
+            add_help_option=add_help_option,
+            no_args_is_help=no_args_is_help,
+            hidden=hidden,
+            deprecated=deprecated,
+            rich_help_panel=rich_help_panel,
+        )
 
         @wraps(decorator)
         def wrapped(f):
@@ -315,7 +423,7 @@ def _fixed_signature(
     """
     sig = inspect.signature(typer_command)
 
-    def fix_param(p):
+    def fix_param(p: inspect.Parameter) -> inspect.Parameter:
         if isinstance(p.default, models.OptionInfo):
             kind = p.KEYWORD_ONLY
         else:
