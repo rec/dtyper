@@ -191,9 +191,12 @@ Some of the code is offloaded to helper files like `helper.py`:
 """
 
 from __future__ import annotations
+
+import inspect
+from dataclasses import field, make_dataclass
 from functools import wraps
 from typing import TYPE_CHECKING
-import inspect
+
 import typer
 from typer import (
     Abort,
@@ -237,13 +240,8 @@ from typer import (
 )
 from typer.core import TyperCommand
 
-try:
-    from datacls import field, make_dataclass
-except ImportError:
-    from dataclasses import field, make_dataclass
-
 if TYPE_CHECKING:
-    from typing import Callable, Optional, Type, TypeVar, Union, Dict, Any
+    from typing import Any, Callable, Dict, Optional, Type, TypeVar, Union
 
     from typing_extensions import ParamSpec
 
@@ -297,9 +295,7 @@ __all__ = (
 
 @wraps(make_dataclass)
 def dataclass(
-    typer_command: Callable[P, R],
-    base: Optional[Type] = None,
-    **kwargs
+    typer_command: Callable[P, R], base: Optional[Type] = None, **kwargs
 ) -> Callable[[Union[Type, Callable]], Type]:
     """Automatically construct a dataclass from a typer command.
 
@@ -343,9 +339,7 @@ def dataclass(
     return dataclass_maker
 
 
-def function(
-    typer_command: Callable[P, R]
-) -> Callable[P, R]:
+def function(typer_command: Callable[P, R]) -> Callable[P, R]:
     """
     Decorate a typer.command to be called outside of a typer.Typer app context.
 
@@ -415,9 +409,7 @@ class Typer(typer.Typer):
         return wrapped
 
 
-def _fixed_signature(
-    typer_command: Callable[P, R]
-) -> inspect.Signature:
+def _fixed_signature(typer_command: Callable[P, R]) -> inspect.Signature:
     """
     Return `inspect.Signature` with fixed default values for typer objects.
     """
@@ -425,7 +417,7 @@ def _fixed_signature(
 
     def fix_param(p: inspect.Parameter) -> inspect.Parameter:
         if isinstance(p.default, models.OptionInfo):
-            kind = p.KEYWORD_ONLY
+            kind: Any = p.KEYWORD_ONLY
         else:
             kind = p.kind
 

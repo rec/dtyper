@@ -1,7 +1,9 @@
-import dtyper
-from typer import Argument, Option, Typer
 from typing import Optional
+
 import pytest
+from typer import Argument, Option, Typer
+
+import dtyper
 
 command = Typer().command
 dcommand = dtyper.Typer().command
@@ -10,17 +12,9 @@ dcommand = dtyper.Typer().command
 @dtyper.function
 @command(help='test')
 def simple_command(
-    bucket: str = Argument(
-        ..., help='The bucket to use'
-    ),
-
-    keys: str = Argument(
-        'keys', help='The keys to download'
-    ),
-
-    pid: Optional[int] = Option(
-        None, help='pid'
-    ),
+    bucket: str = Argument(..., help='The bucket to use'),
+    keys: str = Argument('keys', help='The keys to download'),
+    pid: Optional[int] = Option(None, help='pid'),
 ):
     return bucket, keys, pid
 
@@ -31,17 +25,9 @@ def test_simple_command():
 
 @dcommand(help='test')
 def simple_command2(
-    bucket: str = Argument(
-        ..., help='The bucket to use'
-    ),
-
-    keys: str = Argument(
-        'keys', help='The keys to download'
-    ),
-
-    pid: Optional[int] = Option(
-        None, help='pid'
-    ),
+    bucket: str = Argument(..., help='The bucket to use'),
+    keys: str = Argument('keys', help='The keys to download'),
+    pid: Optional[int] = Option(None, help='pid'),
 ):
     return bucket, keys, pid
 
@@ -63,17 +49,9 @@ def test_args():
 
 @command(help='test')
 def a_command(
-    bucket: str = Argument(
-        ..., help='The bucket to use'
-    ),
-
-    keys: str = Argument(
-        'keys', help='The keys to download'
-    ),
-
-    pid: Optional[int] = Option(
-        None, help='pid'
-    ),
+    bucket: str = Argument(..., help='The bucket to use'),
+    keys: str = Argument('keys', help='The keys to download'),
+    pid: Optional[int] = Option(None, help='pid'),
 ):
     return ACommand(**locals())()
 
@@ -144,6 +122,7 @@ def test_inheritance():
 
 def test_aliases():
     from dtyper import Argument, Option
+
     assert Argument is globals()['Argument']
     assert Option is globals()['Option']
 
@@ -151,21 +130,10 @@ def test_aliases():
 @dtyper.function
 @command(help='test')
 def less_simple_command(
-    bucket: str = Argument(
-        ..., help='The bucket to use'
-    ),
-
-    keys: str = Argument(
-        'keys', help='The keys to download'
-    ),
-
-    pid: Optional[int] = Option(
-        None, help='pid'
-    ),
-
-    pod: Optional[int] = Option(
-        ..., help='pid'
-    ),
+    bucket: str = Argument(..., help='The bucket to use'),
+    keys: str = Argument('keys', help='The keys to download'),
+    pid: Optional[int] = Option(None, help='pid'),
+    pod: Optional[int] = Option(..., help='pid'),
 ):
     return bucket, keys, pid, pod
 
