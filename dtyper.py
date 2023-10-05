@@ -192,7 +192,7 @@ Some of the code is offloaded to helper files like `helper.py`:
 
 from __future__ import annotations
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING
 import inspect
 import typer
 from typer import (
@@ -243,7 +243,7 @@ except ImportError:
     from dataclasses import field, make_dataclass
 
 if TYPE_CHECKING:
-    from typing import Callable, Optional, Type, TypeVar, Union
+    from typing import Callable, Optional, Type, TypeVar, Union, Dict, Any
 
     from typing_extensions import ParamSpec
 
