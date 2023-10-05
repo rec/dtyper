@@ -289,6 +289,7 @@ __all__ = (
     'unstyle',
     'utils',
     'dataclass',
+    'make_dataclass_args',
     'function',
 )
 
@@ -308,6 +309,36 @@ def dataclass(
     # is called twice on the same function.
     typer_command = getattr(typer_command, '_dtyper_dec', typer_command)
 
+    @wraps(typer_command)
+    def dataclass_maker(function_or_class: Union[Type, Callable]) -> Type:
+        ka = make_dataclass_args(
+            typer_command, function_or_class, base, **kwargs
+        )
+        return make_dataclass(**ka)
+
+    return dataclass_maker
+
+
+@wraps(make_dataclass)
+def make_dataclass_args(
+    typer_command: Callable[P, R],
+    function_or_class: Union[Type, Callable],
+    base: Optional[Type] = None,
+    **kwargs,
+) -> Dict[str, Any]:
+    """Automatically construct a dataclass from a typer command.
+
+    One dataclass field is created for each parameter to the typer
+    command, using typer default values obtained from
+    typer.Argument and typer.Option, if they exist.
+    """
+
+    assert callable(function_or_class)
+
+    # The ._dtyper_dec logic handles the case where the decorator
+    # is called twice on the same function.
+    typer_command = getattr(typer_command, '_dtyper_dec', typer_command)
+
     if base is not None:
         kwargs['bases'] = *kwargs.get('bases', ()), base
 
@@ -321,22 +352,16 @@ def dataclass(
     kwargs['fields'] = [param_to_field_desc(p) for p in params]
     kwargs.setdefault('cls_name', typer_command.__name__)
 
-    @wraps(typer_command)
-    def dataclass_maker(function_or_class: Union[Type, Callable]) -> Type:
-        assert callable(function_or_class)
+    ka = dict(kwargs)
+    ns = ka.setdefault('namespace', {})
+    ns['typer_command'] = staticmethod(typer_command)
 
-        ka = dict(kwargs)
-        ns = ka.setdefault('namespace', {})
-        ns['typer_command'] = staticmethod(typer_command)
+    if isinstance(function_or_class, type):
+        ka['bases'] = *ka.get('bases', ()), function_or_class
+    else:
+        ns['__call__'] = function_or_class
 
-        if isinstance(function_or_class, type):
-            ka['bases'] = *ka.get('bases', ()), function_or_class
-        else:
-            ns['__call__'] = function_or_class
-
-        return make_dataclass(**ka)
-
-    return dataclass_maker
+    return ka
 
 
 def function(typer_command: Callable[P, R]) -> Callable[P, R]:
