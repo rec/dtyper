@@ -1,7 +1,10 @@
 [tool.black]
 line-length = 79
 skip-string-normalization = true
-target-version = ['py37']
+target-version = ['py38']
+
+[tool.isort]
+profile = "black"
 
 [tool.doks]
 auto = true
@@ -18,13 +21,14 @@ version = "2.3.1"
 [tool.poetry.dependencies]
 python = ">=3.8"
 typer = "*"
-pyright = "^1.1.318"
 
 [tool.poetry.group.dev.dependencies]
-coverage = "*"
-flake8 = "*"
-pytest = "*"
-versy = "*"
+coverage = ">=7.1.0"
+black = ">=23.9.1"
+isort = ">=5.12.0"
+mypy = ">=1.5.1"
+pytest = ">=7.4.2"
+ruff = ">=0.0.292"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
