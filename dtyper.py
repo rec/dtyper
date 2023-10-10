@@ -380,7 +380,6 @@ class Typer(typer.Typer):
     above so they can be called from regular Python code.
     """
 
-    @wraps(typer.Typer.command)
     def command(
         self,
         name: Optional[str] = None,
