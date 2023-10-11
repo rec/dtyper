@@ -194,7 +194,7 @@ from __future__ import annotations
 
 import inspect
 from dataclasses import field, make_dataclass
-from functools import wraps
+from functools import update_wrapper
 from typing import TYPE_CHECKING
 
 import typer
@@ -294,7 +294,6 @@ __all__ = (
 )
 
 
-@wraps(make_dataclass)
 def dataclass(
     typer_command: Callable[P, R], **kwargs
 ) -> Callable[[Union[Type, Callable]], Type]:
@@ -309,7 +308,6 @@ def dataclass(
     # is called twice on the same function.
     typer_command = getattr(typer_command, '_dtyper_dec', typer_command)
 
-    @wraps(typer_command)
     def dataclass_maker(function_or_class: Union[Type, Callable]) -> Type:
         assert callable(function_or_class)
 
@@ -321,10 +319,13 @@ def dataclass(
 
         return make_dataclass(**ka)
 
+    update_wrapper(dataclass_maker, typer_command)
     return dataclass_maker
 
 
-@wraps(make_dataclass)
+update_wrapper(dataclass, make_dataclass)
+
+
 def make_dataclass_args(
     typer_command: Callable[P, R], **kwargs
 ) -> Dict[str, Any]:
@@ -353,6 +354,9 @@ def make_dataclass_args(
     return kwargs
 
 
+update_wrapper(make_dataclass_args, make_dataclass)
+
+
 def function(typer_command: Callable[P, R]) -> Callable[P, R]:
     """
     Decorate a typer.command to be called outside of a typer.Typer app context.
@@ -363,12 +367,12 @@ def function(typer_command: Callable[P, R]) -> Callable[P, R]:
     """
     sig = _fixed_signature(typer_command)
 
-    @wraps(typer_command)
     def wrapped(*args: P.args, **kwargs: P.kwargs) -> R:
         bound = sig.bind(*args, **kwargs)
         bound.apply_defaults()
         return typer_command(*bound.args, **bound.kwargs)
 
+    update_wrapper(wrapped, typer_command)
     wrapped.__signature__ = sig  # type: ignore
     return wrapped
 
@@ -380,7 +384,6 @@ class Typer(typer.Typer):
     above so they can be called from regular Python code.
     """
 
-    @wraps(typer.Typer.command)
     def command(
         self,
         name: Optional[str] = None,
@@ -413,14 +416,17 @@ class Typer(typer.Typer):
             rich_help_panel=rich_help_panel,
         )
 
-        @wraps(decorator)
         def wrapped(f):
             decorated = decorator(f)
             func = function(decorated)
             func._dtyper_dec = decorated
             return func
 
+        update_wrapper(wrapped, decorator)
         return wrapped
+
+
+update_wrapper(Typer.command, typer.Typer.command)
 
 
 def _fixed_signature(typer_command: Callable[P, R]) -> inspect.Signature:
