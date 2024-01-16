@@ -37,6 +37,12 @@ source = ["dtyper"]
 fail_under = 94
 skip_covered = true
 exclude_lines = ["pragma: no cover", "if False:", "if __name__ == .__main__.:", "raise NotImplementedError"]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.format]
+quote-style = "single"
 [build-system]
 build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core"]
