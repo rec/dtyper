@@ -193,9 +193,9 @@ Some of the code is offloaded to helper files like `helper.py`:
 from __future__ import annotations
 
 import inspect
+import typing as t
 from dataclasses import field, make_dataclass
 from functools import update_wrapper
-from typing import TYPE_CHECKING
 
 import typer
 from typer import (
@@ -239,14 +239,14 @@ from typer import (
     utils,
 )
 from typer.core import TyperCommand
+from typer.models import CommandFunctionType
+from typing_extensions import ParamSpec
 
-if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, Optional, Type, TypeVar, Union
+P = ParamSpec('P')
+R = t.TypeVar('R')
 
-    from typing_extensions import ParamSpec
-
-    P = ParamSpec('P')
-    R = TypeVar('R')
+Type = t.Type[t.Any]
+Callable = t.Callable[..., t.Any]
 
 __all__ = (
     'Abort',
@@ -295,8 +295,8 @@ __all__ = (
 
 
 def dataclass(
-    typer_command: Callable[P, R], **kwargs
-) -> Callable[[Union[Type, Callable]], Type]:
+    typer_command: t.Callable[P, R], **kwargs: t.Any
+) -> t.Callable[[t.Union[Type, Callable]], Type]:
     """Automatically construct a dataclass from a typer command.
 
     One dataclass field is created for each parameter to the typer
@@ -308,7 +308,7 @@ def dataclass(
     # is called twice on the same function.
     typer_command = getattr(typer_command, '_dtyper_dec', typer_command)
 
-    def dataclass_maker(function_or_class: Union[Type, Callable]) -> Type:
+    def dataclass_maker(function_or_class: t.Union[Type, Callable]) -> Type:
         assert callable(function_or_class)
 
         ka = make_dataclass_args(typer_command, **kwargs)
@@ -327,8 +327,8 @@ update_wrapper(dataclass, make_dataclass)
 
 
 def make_dataclass_args(
-    typer_command: Callable[P, R], **kwargs
-) -> Dict[str, Any]:
+    typer_command: t.Callable[P, R], **kwargs: t.Any
+) -> t.Dict[str, t.Any]:
     """Take a typer comamnd and return the arguments to be passed to
     dataclasses.make_dataclass to construct a dataclass whose elements correspond
     to the Arguments and Options to the typer command.
@@ -338,7 +338,7 @@ def make_dataclass_args(
     # is called twice on the same function.
     typer_command = getattr(typer_command, '_dtyper_dec', typer_command)
 
-    def param_to_field_desc(p):
+    def param_to_field_desc(p) -> t.Tuple[t.Any, ...]:  # type: ignore[no-untyped-def]
         if p.default is inspect.Parameter.empty:
             return p.name, p.annotation
         else:
@@ -347,9 +347,7 @@ def make_dataclass_args(
     params = _fixed_signature(typer_command).parameters.values()
     kwargs['fields'] = [param_to_field_desc(p) for p in params]
     kwargs.setdefault('cls_name', typer_command.__name__)
-    kwargs.setdefault('namespace', {})['typer_command'] = staticmethod(
-        typer_command
-    )
+    kwargs.setdefault('namespace', {})['typer_command'] = staticmethod(typer_command)
 
     return kwargs
 
@@ -357,7 +355,7 @@ def make_dataclass_args(
 update_wrapper(make_dataclass_args, make_dataclass)
 
 
-def function(typer_command: Callable[P, R]) -> Callable[P, R]:
+def function(typer_command: t.Callable[P, R]) -> t.Callable[P, R]:
     """
     Decorate a typer.command to be called outside of a typer.Typer app context.
 
@@ -386,21 +384,21 @@ class Typer(typer.Typer):
 
     def command(
         self,
-        name: Optional[str] = None,
+        name: t.Optional[str] = None,
         *,
-        cls: Optional[Type[TyperCommand]] = None,
-        context_settings: Optional[Dict[Any, Any]] = None,
-        help: Optional[str] = None,
-        epilog: Optional[str] = None,
-        short_help: Optional[str] = None,
+        cls: t.Optional[t.Type[TyperCommand]] = None,
+        context_settings: t.Optional[t.Dict[t.Any, t.Any]] = None,
+        help: t.Optional[str] = None,
+        epilog: t.Optional[str] = None,
+        short_help: t.Optional[str] = None,
         options_metavar: str = '[OPTIONS]',
         add_help_option: bool = True,
         no_args_is_help: bool = False,
         hidden: bool = False,
         deprecated: bool = False,
         # Rich settings
-        rich_help_panel: Union[str, None] = models.Default(None),
-    ):
+        rich_help_panel: t.Union[str, None] = models.Default(None),
+    ) -> t.Callable[[CommandFunctionType], CommandFunctionType]:
         decorator = super().command(
             name,
             cls=cls,
@@ -416,11 +414,11 @@ class Typer(typer.Typer):
             rich_help_panel=rich_help_panel,
         )
 
-        def wrapped(f):
+        def wrapped(f: CommandFunctionType) -> CommandFunctionType:
             decorated = decorator(f)
             func = function(decorated)
-            func._dtyper_dec = decorated
-            return func
+            func._dtyper_dec = decorated  # type: ignore[attr-defined]
+            return t.cast(CommandFunctionType, func)
 
         update_wrapper(wrapped, decorator)
         return wrapped
@@ -429,7 +427,7 @@ class Typer(typer.Typer):
 update_wrapper(Typer.command, typer.Typer.command)
 
 
-def _fixed_signature(typer_command: Callable[P, R]) -> inspect.Signature:
+def _fixed_signature(typer_command: t.Callable[P, R]) -> inspect.Signature:
     """
     Return `inspect.Signature` with fixed default values for typer objects.
     """
@@ -437,7 +435,7 @@ def _fixed_signature(typer_command: Callable[P, R]) -> inspect.Signature:
 
     def fix_param(p: inspect.Parameter) -> inspect.Parameter:
         if isinstance(p.default, models.OptionInfo):
-            kind: Any = p.KEYWORD_ONLY
+            kind: t.Any = p.KEYWORD_ONLY
         else:
             kind = p.kind
 

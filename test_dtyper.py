@@ -73,7 +73,7 @@ def test_acommand():
     assert ACommand('bukket')() == ('bukket-post', 'keys', None)
     assert ACommand('bukket', 'kois', pid=3)() == ('bukket-post', 'kois', 3)
 
-    match = 'missing 1 required positional argument: \'bucket\''
+    match = "missing 1 required positional argument: 'bucket'"
     with pytest.raises(TypeError, match=match):
         ACommand()
 
