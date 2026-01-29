@@ -1,25 +1,46 @@
+[project]
+name = "dtyper"
+version = "2.5.1"
+description = "🗝 Fix and improve `typer` 🗝"
+authors = [{ name = "Tom Ritchford", email = "tom@swirly.com" }]
+requires-python = ">=3.8"
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = ["typer"]
+
+[project.urls]
+Homepage = "https://github.com/rec/dtyper"
+Repository = "https://github.com/rec/dtyper"
+Documentation = "https://rec.github.io/dtyper"
+
 [tool.doks]
 auto = true
 
-[tool.poetry]
-authors = ["Tom Ritchford <tom@swirly.com>"]
-description = "🗝 Fix and improve `typer` 🗝"
-homepage = "https://github.com/rec/dtyper"
-name = "dtyper"
-readme = "README.md"
-repository = "https://github.com/rec/dtyper"
-version = "2.5.1"
-documentation = "https://rec.github.io/dtyper"
+[dependency-groups]
+dev = [
+    "coverage",
+    "mypy",
+    "pytest",
+    "ruff",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.8"
-typer = "*"
+[tool.uv]
 
-[tool.poetry.group.dev.dependencies]
-coverage = "*"
-mypy = "*"
-pytest = "*"
-ruff = "*"
+[tool.uv.build-backend]
+module-root = ""
+
+[build-system]
+requires = ["uv_build>=0.9.0,<0.10.0"]
+build-backend = "uv_build"
 
 [tool.coverage.run]
 branch = true
@@ -38,6 +59,3 @@ quote-style = "single"
 
 [tool.mypy]
 strict = true
-[build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core"]
