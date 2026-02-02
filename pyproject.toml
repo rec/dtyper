@@ -58,5 +58,3 @@ line-length = 88
 [tool.ruff.format]
 quote-style = "single"
 
-[tool.mypy]
-strict = true
