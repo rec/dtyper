@@ -28,9 +28,10 @@ auto = true
 [dependency-groups]
 dev = [
     "coverage",
-    "mypy",
     "pytest",
+    "pyupgrade>=3.21.2",
     "ruff",
+    "ty>=0.0.14",
 ]
 
 [tool.uv]
