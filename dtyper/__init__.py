@@ -338,7 +338,7 @@ def make_dataclass_args(
     # is called twice on the same function.
     typer_command = getattr(typer_command, '_dtyper_dec', typer_command)
 
-    def param_to_field_desc(p) -> t.Tuple[t.Any, ...]:  # type: ignore[no-untyped-def]
+    def param_to_field_desc(p) -> t.Tuple[t.Any, ...]:
         if p.default is inspect.Parameter.empty:
             return p.name, p.annotation
         else:
