@@ -25,15 +25,6 @@ dev = [
     "ty>=0.0.14",
 ]
 
-[tool.uv]
-
-[tool.uv.build-backend]
-module-root = ""
-
-[build-system]
-requires = ["uv_build>=0.9.0,<0.10.0"]
-build-backend = "uv_build"
-
 [tool.coverage.run]
 branch = true
 source = ["dtyper"]
@@ -49,3 +40,18 @@ line-length = 88
 [tool.ruff.format]
 quote-style = "single"
 
+
+[tool.poetry]
+name = "dtyper"
+version = "0.1.0"
+description = "🗝 Fix and improve `typer` 🗝"
+authors = ["Tom Ritchford <tom@swirly.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
