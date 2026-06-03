@@ -1,6 +1,6 @@
 [project]
 name = "dtyper"
-version = "2.7.0"
+version = "2.8.0"
 description = "🗝 Fix and improve `typer` 🗝"
 authors = [{ name = "Tom Ritchford", email = "tom@swirly.com" }]
 requires-python = ">=3.10"
@@ -43,7 +43,7 @@ quote-style = "single"
 
 [tool.poetry]
 name = "dtyper"
-version = "2.7.0"
+version = "2.8.0"
 description = "🗝 Fix and improve `typer` 🗝"
 authors = ["Tom Ritchford <tom@swirly.com>"]
 readme = "README.md"

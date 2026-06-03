@@ -2,6 +2,10 @@ version = 1
 revision = 3
 requires-python = ">=3.10"
 
+[options]
+exclude-newer = "2026-05-27T16:12:08.389183Z"
+exclude-newer-span = "P1W"
+
 [[package]]
 name = "click"
 version = "8.1.7"
@@ -64,7 +68,7 @@ wheels = [
 
 [[package]]
 name = "dtyper"
-version = "2.7.0"
+version = "2.8.0"
 source = { editable = "." }
 dependencies = [
     { name = "typer" },
