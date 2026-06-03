@@ -210,7 +210,6 @@ from typer import (
     FileText,
     FileTextWrite,
     Option,
-    clear,
     colors,
     completion,
     confirm,
@@ -238,6 +237,12 @@ from typer import (
     unstyle,
     utils,
 )
+
+try:
+    from typer import clear
+except ImportError:
+    pass
+
 from typer.core import TyperCommand
 from typer.models import CommandFunctionType
 from typing_extensions import ParamSpec
@@ -248,7 +253,7 @@ R = t.TypeVar('R')
 Type = t.Type[t.Any]
 Callable = t.Callable[..., t.Any]
 
-__all__ = (
+__all__ = [
     'Abort',
     'Argument',
     'BadParameter',
@@ -261,7 +266,6 @@ __all__ = (
     'FileTextWrite',
     'Option',
     'Typer',
-    'clear',
     'colors',
     'completion',
     'confirm',
@@ -291,7 +295,10 @@ __all__ = (
     'dataclass',
     'make_dataclass_args',
     'function',
-)
+]
+
+if 'clear' in locals():
+    __all__ += ['clear']
 
 
 def dataclass(
@@ -346,7 +353,8 @@ def make_dataclass_args(
 
     params = _fixed_signature(typer_command).parameters.values()
     kwargs['fields'] = [param_to_field_desc(p) for p in params]
-    kwargs.setdefault('cls_name', typer_command.__name__)
+    if hasattr(typer_command, '__name__'):
+        kwargs.setdefault('cls_name', typer_command.__name__)
     kwargs.setdefault('namespace', {})['typer_command'] = staticmethod(typer_command)
 
     return kwargs
